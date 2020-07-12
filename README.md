@@ -178,4 +178,6 @@ AUTHOR
 - Excel::Writer::XLSX
 - Excel::Writer::XLSX::Utility
 - Spreadsheet::Read
+- Spreadsheet::ParseXLSX
+- Text::CSV_XS
 - DateTime::Format::Excel
