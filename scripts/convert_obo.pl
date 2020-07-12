@@ -6,9 +6,9 @@ convert_obo.pl
 
 =head1 SYNOPSIS
 
-Usage: perl convert_obo.pl -d namespace -n namespace -o output [-v] input
+Usage: perl convert_obo.pl -d namespace [-n namespace] -o output [-v] input
 
-Example: perl convert_obo.pl -d sugar_kelp_traits -n sugar_kelp_traits -n sugar_kelp_variables -o sgn.obo standard.obo
+Example: perl convert_obo.pl -d barley_traits -n barley_traits_trait -n barley_traits_variable -o sgn.obo standard.obo
 
 Options/Arguments:
 
@@ -16,20 +16,20 @@ Options/Arguments:
 
 =item --default, -d
 
-the default namespace to be used in the sgn-obo file
+The default / root namespace.  This is the namespace that the other namespaces 
+([{default}_trait, {default}_variable] or namespaces provided as -n args) will 
+be converted to.  This is the namespace that will have to be given to the gmod 
+scriptswhen loading an ontology into breedbase.
 
 =item --namespace, -n
 
-The namespace(s) from the standard-obo file to keep in the sgn-obo file. 
-These will be renamed to the default namespace (-d). This option can be 
-used more than once to specify multiple namespaces to include.
+The namespace(s) from the standard-obo file to renamed to the default (-d) namespace 
+in the output obo file. This option can be used more than once to specify multiple 
+namespaces to include. To load an ontology into breedbase, this should include the 
+namespaces of the ontology root term, trait classes, traits, and variables.
 
-This should include the namespaces of the ontology root term, trait classes, 
-traits, and variables.
-
-If the standard-obo file was generated using the build.pl script, this will likely 
-include the namespaces of {default namespace}, {default namespace}_trait 
-and {default_namespace}_variable.
+By default, this script will use the {default namespace}, {default namespace}_trait, 
+and {default namepspace}_variable namespaces to convert if none are given here.
 
 =item --output, -o
 
@@ -74,7 +74,7 @@ use Data::Dumper;
 
 # PROGRAM INFORMATION
 my $PROGRAM_NAME = "convert_obo.pl";
-my $PROGRAM_VERSION = "1.0";
+my $PROGRAM_VERSION = "1.1";
 
 
 
@@ -111,9 +111,9 @@ if ( !defined($default_namespace) ) {
     die "==> ERROR: A default namespace (-d) must be specified.";
 }
 
-# Make sure at least one namespace is given
+# Use default namespaces, if none provided
 if ( !defined($namespaces) ) {
-    die "==> ERROR: At least one namespace to keep (-n) must be specified.";
+    $namespaces = [$default_namespace . "_trait", $default_namespace . "_variable"];
 }
 
 
