@@ -49,9 +49,10 @@ file path to the trait workbook
 
 =head1 DESCRIPTION
 
-Build a trait dictionary and/or standard obo file from a "trait workbook" (an Excel workbook 
-containing worksheets for a trait ontology's "Variables", "Traits", "Methods", "Scales", 
-"Trait Classes" and "Root" information).
+Build a trait dictionary (a flat text file containg all of the trait information used by the 
+Crop Ontology website) and/or standard obo file (generalized ontology text file) from a 
+"trait workbook" (an Excel workbook containing worksheets for a trait ontology's "Variables", 
+"Traits", "Methods", "Scales", "Trait Classes" and "Root" information).
 
 =head1 AUTHOR
 

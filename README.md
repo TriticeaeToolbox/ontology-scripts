@@ -14,7 +14,7 @@ each data type: Variables, Traits, Methods, Scales, Trait Classes, and
 Ontology Root Information.  This file is used internally to edit and/or 
 add new traits.
 
-**Trait Dictionary:** A semi-colon separated file used by the Crop 
+**Trait Dictionary:** A semi-colon separated flat text file used by the Crop 
 Ontology website.  Each row of a Trait Dictionary is an observation 
 variable and contains the complete trait, method and scale information 
 for the variable.

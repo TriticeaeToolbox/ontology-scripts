@@ -43,9 +43,11 @@ trait dictionary.
 =head1 DESCRIPTION
 
 This will create a 'Trait Workbook' Excel file from an existing Crop 
-Ontology 'Trait Dictionary'.  The Trait Dictionary can be specified by 
-it's CO ID (such as CO_360) and downloaded from the Crop Ontology website 
-OR by a file path to an existing Trait Dictionary file.
+Ontology 'Trait Dictionary'.  A Trait Dictionary is a flat text file 
+containing all of the trait information available on the Crop Ontology website.
+The Trait Dictionary can be specified by it's CO ID (such as CO_360) and 
+downloaded from the Crop Ontology website OR by a file path to an existing 
+Trait Dictionary file.
 
 The resulting Trait Workbook will contain the worksheets 'Variables', 'Traits', 
 'Methods', 'Scales', 'Trait Classes' and 'Root'.  Some columns will have 
