@@ -14,7 +14,7 @@ each data type: Variables, Traits, Methods, Scales, Trait Classes, and
 Ontology Root Information.  This file is used internally to edit and/or 
 add new traits.
 
-**Trait Dictionary:** A semi-colon separated file used by the Crop 
+**Trait Dictionary:** A semi-colon separated flat text file used by the Crop 
 Ontology website.  Each row of a Trait Dictionary is an observation 
 variable and contains the complete trait, method and scale information 
 for the variable.
@@ -65,9 +65,11 @@ SYNOPSIS
 
 DESCRIPTION
     This will create a 'Trait Workbook' Excel file from an existing Crop
-    Ontology 'Trait Dictionary'. The Trait Dictionary can be specified by
-    it's CO ID (such as CO_360) and downloaded from the Crop Ontology
-    website OR by a file path to an existing Trait Dictionary file.
+    Ontology 'Trait Dictionary'. A Trait Dictionary is a flat text file
+    containing all of the trait information available on the Crop Ontology
+    website. The Trait Dictionary can be specified by it's CO ID (such as
+    CO_360) and downloaded from the Crop Ontology website OR by a file path
+    to an existing Trait Dictionary file.
 
     The resulting Trait Workbook will contain the worksheets 'Variables',
     'Traits', 'Methods', 'Scales', 'Trait Classes' and 'Root'. Some columns
@@ -91,7 +93,7 @@ NAME
 
 SYNOPSIS
     Usage: perl build_traits.pl [-o output -u username] [-t output] [-i
-    institution] [-fv] file
+    institution] [-c category count] [-fv] file
 
     Options/Arguments:
 
@@ -105,6 +107,9 @@ SYNOPSIS
     -i      filter the output to contain only the variables used by the
             specified institution
 
+    -c      specify the number of scale categories that are defined in the
+            trait workbook (default=10)
+
     -f      force the generation of the files (ignore the unique and
             required checks)
 
@@ -113,10 +118,11 @@ SYNOPSIS
     file    file path to the trait workbook
 
 DESCRIPTION
-    Build a trait dictionary and/or standard obo file from a "trait
-    workbook" (an Excel workbook containing worksheets for a trait
-    ontology's "Variables", "Traits", "Methods", "Scales", "Trait Classes"
-    and "Root" information).
+    Build a trait dictionary (a flat text file containg all of the trait
+    information used by the Crop Ontology website) and/or standard obo file
+    (generalized ontology text file) from a "trait workbook" (an Excel
+    workbook containing worksheets for a trait ontology's "Variables",
+    "Traits", "Methods", "Scales", "Trait Classes" and "Root" information).
 
 AUTHOR
     David Waring <djw64@cornell.edu>
@@ -129,30 +135,32 @@ NAME
     convert_obo.pl
 
 SYNOPSIS
-    Usage: perl convert_obo.pl -d namespace -n namespace -o output [-v]
+    Usage: perl convert_obo.pl -d namespace [-n namespace] -o output [-v]
     input
 
-    Example: perl convert_obo.pl -d sugar_kelp_traits -n sugar_kelp_traits
-    -n sugar_kelp_variables -o sgn.obo standard.obo
+    Example: perl convert_obo.pl -d barley_traits -n barley_traits_trait -n
+    barley_traits_variable -o sgn.obo standard.obo
 
     Options/Arguments:
 
     --default, -d
-            the default namespace to be used in the sgn-obo file
+            The default / root namespace. This is the namespace that the
+            other namespaces ([{default}_trait, {default}_variable] or
+            namespaces provided as -n args) will be converted to. This is
+            the namespace that will have to be given to the gmod scriptswhen
+            loading an ontology into breedbase.
 
     --namespace, -n
-            The namespace(s) from the standard-obo file to keep in the
-            sgn-obo file. These will be renamed to the default namespace
-            (-d). This option can be used more than once to specify multiple
-            namespaces to include.
+            The namespace(s) from the standard-obo file to renamed to the
+            default (-d) namespace in the output obo file. This option can
+            be used more than once to specify multiple namespaces to
+            include. To load an ontology into breedbase, this should include
+            the namespaces of the ontology root term, trait classes, traits,
+            and variables.
 
-            This should include the namespaces of the ontology root term,
-            trait classes, traits, and variables.
-
-            If the standard-obo file was generated using the build.pl
-            script, this will likely include the namespaces of {default
-            namespace}, {default namespace}_trait and
-            {default_namespace}_variable.
+            By default, this script will use the {default namespace},
+            {default namespace}_trait, and {default namepspace}_variable
+            namespaces to convert if none are given here.
 
     --output, -o
             specify the output location for the sgn-obo file
@@ -178,4 +186,6 @@ AUTHOR
 - Excel::Writer::XLSX
 - Excel::Writer::XLSX::Utility
 - Spreadsheet::Read
+- Spreadsheet::ParseXLSX
+- Text::CSV_XS
 - DateTime::Format::Excel
