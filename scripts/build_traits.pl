@@ -324,9 +324,11 @@ sub parseSheet {
             if ( defined($filter_institution) ) {
                 if ( $sheetName eq "Variables" && $key eq "Institution" ) {
                     $include = 0;
-                    for (split(/\s*\,\s*/, $value)) {
-                        if ( $_ eq $filter_institution ) {
-                            $include = 1;
+                    if ( defined $value && $value ne "" ) {
+                        for (split(/\s*\,\s*/, $value)) {
+                            if ( $_ eq $filter_institution ) {
+                                $include = 1;
+                            }
                         }
                     }
                 }
