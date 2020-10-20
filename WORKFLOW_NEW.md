@@ -9,7 +9,8 @@ into a breedbase instance).
 
 ## Create a New Trait Workbook
 
-You'll need to give the `create_tw.pl` script the following parameters:
+You can create a mostly blank Trait Workbook using the `create_tw.pl` script. 
+You'll need to give the script the following parameters:
 
 - `-d` = The default ontology namespace.  This namespace will be 
 applied to all of the ontology terms loaded into breedbase. (tomato_trait)
@@ -23,7 +24,7 @@ in the Trait Workbook later. (CO_999)
 - `-o` = The path to the generated Trait Workbook .xlsx file. (./traits.xlsx)
 
 When *not* providing the input argument, the script will create a new trait workbook 
-file with a single variable, trait, method and scale as an example.
+file containing a single variable, trait, method and scale as an example.
 
 ```perl
 perl create_tw.pl -d tomato_trait -n "Tomato Traits" -r CO_999 -o ./traits.xlsx -v
@@ -36,20 +37,21 @@ workbook contains information for each of the different types of ontology terms.
 important to know how the different ontology terms are defined and how they relate to 
 each other:
 
-- A **variable** is the term that actual phenotype observations are associated with.  
-The variable is composed of a *trait*, *method*, and *scale*.  For example, when you 
+- A **variable** is the term that actual phenotype observations are associated with. The 
+variable is composed of a *trait*, *method*, and *scale*.  For example, when you 
 go out into the field and measure plant height you will associate your measurement 
 with a single variable that is composed of the trait for plant height, the method 
 that describes the way you observed the trait (such as a direct measurement of plant 
-height using a meter stick vs a calculated measurement of plant height using a 
-clinometer), and the scale used to record the measurmenet (such as cm vs m).
+height using a meter stick), and the scale used to record the measurmenet (such as cm).
 - A **trait** is the entity that is observed.  In our plant height example, the 
 trait would be plant height with a description of how plant height is defined 
 for your crop.
 - A **method** is the procedure for observing a trait.  In our example for plant height
-we would create a direct measurement of plant height method that describes how to measure 
-plant height directly in the filed using a meter stick.  A trait can have more 
-than one method associated with it, if it is observed in different ways.
+we would create a method for the direct measurement of plant height that describes 
+how to measure plant height directly in the filed using a meter stick.  A trait 
+can have more than one method associated with it, if it is observed in different ways 
+(such as the direct measurement of the height using a meter stick vs a calculated 
+measurement of plant height using a clinometer).
 - A **scale** is the units in which a trait is observed (such as cm).  A categorical 
 scale can have descriptions for each of its categories.
 - A **trait class** is a category of traits.  Each trait should be associated with 
@@ -90,10 +92,11 @@ for duplicates of the same combination of trait, method and scale.  There should
 one variable for each combination of trait, method and scale.
 
 **IDs**
-The **Variable ID**, **Trait ID**, **Method ID**, and **Scale ID** columns need to have 
-a unique ID number across all of the data types (a scale and a method cannot have the 
-same ID number).  This column should contain an integer and will be expanded into the 
-full term ID (such as CO_999:0000001) when building the trait dictionary and obo files.
+- The **Variable ID**, **Trait ID**, **Method ID**, and **Scale ID** columns need to have 
+an ID number that is unique across all of the data types (a scale and a method cannot 
+have the same ID number).  This column should contain an integer and will be expanded 
+into the full term ID (such as CO_999:0000001) when building the trait dictionary and 
+obo files.
 
 ## Building Files
 
