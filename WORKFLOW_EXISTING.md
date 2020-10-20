@@ -14,6 +14,10 @@ sgn-obo file into a breedbase instance.
     
     > If there is an exisiting **Trait Dictionary** for the crop ontology,
     > the **Trait Workbook** can be created using the `create_tw.pl` script.
+    
+    > For more information on creating a **Trait Workbook** for a new crop
+    > (when an existing **Trait Dictionary** does not exist), see the 
+    > [Creating a New Ontology workflow](WORKFLOW_NEW.md)
 
 
 2) Generate the **Trait Dictionary** and/or **standard-obo** files:
