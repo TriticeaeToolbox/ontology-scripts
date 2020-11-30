@@ -6,7 +6,7 @@ create_tw.pl
 
 =head1 SYNOPSIS
 
-Usage: perl create_tw.pl -d namespace -n name -r root -o output [-v] input
+Usage: perl create_tw.pl -d namespace -n name -r root -o output [-v] [input]
 
 Options/Arguments:
 
@@ -36,7 +36,8 @@ verbose output
 
 specify the Crop Ontology Root ID (ex: CO_360) to download the trait 
 dictionary from cropontology.org OR the file path to an existing 
-trait dictionary.
+trait dictionary.  If no input is provided, a new trait workbook will 
+be created containing an example variable, trait, and scale.
 
 =back
 
@@ -99,6 +100,9 @@ my @TW_ROOT_HEADERS = ("Root ID", "Root name", "namespace");
 my $CF_MAX_ROW = 9999;
 
 
+# Example Row for Blank Workbook
+my $BLANK_HEADER = '"Curation";"Variable ID";"Variable name";"Variable synonyms";"Context of use";"Growth stage";"Variable status";"Variable Xref";"Institution";"Scientist";"Date";"Language";"Crop";"Trait ID";"Trait name";"Trait class";"Trait description";"Trait synonyms";"Main trait abbreviation";"Alternative trait abbreviations";"Entity";"Attribute";"Trait status";"Trait Xref";"Method ID";"Method name";"Method class";"Method description";"Formula";"Method reference";"Scale ID";"Scale name";"Scale class";"Decimal places";"Lower limit";"Upper limit";"Scale Xref";"Category 1";"Category 2";"Category 3";"Category 4";"Category 5";"Category 6";"Category 7";"Category 8";"Category 9";"Category 10"';
+my $BLANK_ROW = '"";"CO_999:0000004";"PH_M_cm";"";"Trial evaluation";"Harvest";"";"";"Cornell University";"";"15-Feb-2018";"English";"Crop";"CO_999:000003";"Plant Height";"Morphological trait";"The observed height of the plant";"";"PH";"";"Stem";height";"";"";"CO_360:0000002";"Plant Height - Measurement";"Measurement";"Direct measurement of the plant height from the ground level to the tallest part of the plant";"";"";"CO_360:0000001";"cm";"Numerical";"2";"";"";"";"";"";"";"";"";"";"";"";"";""';
 
 
 #######################################
@@ -119,7 +123,7 @@ my $namespace = $opts{d};
 # Get Input
 my $input = shift;
 if ( !$input ) {
-    die "==> ERROR: A CO Root ID (ex: CO_360) OR path to a trait dictionary file is a required argument.\n";
+    $input = "_BLANK_";
 }
 
 # Make sure output is specified
@@ -176,8 +180,15 @@ sub getTD {
     my $input = shift;
     my $contents;
 
+    # Start with Blank TD
+    if ( $input eq "_BLANK_" ) {
+        message("Creating Blank Trait Workbook...");
+        $contents = $BLANK_HEADER . "\n" . $BLANK_ROW;
+    }
+
     # Input File Exists
-    if ( -s $input ) {
+    elsif ( -s $input ) {
+        message("Using existing TD file [$input]...");
         open my $fh, '<', $input or die "Can't open input file [$input] $!";
         $contents = do { local $/; <$fh> };
     }

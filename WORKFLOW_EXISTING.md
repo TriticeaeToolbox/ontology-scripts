@@ -1,6 +1,9 @@
-Workflow for Building and Loading an Ontology
+Loading an Existing Ontology into Breedbase
 ========
 
+These steps outline the general workflow of updating an ontology (by modifying its 
+Trait Workbook), creating the standard- and sgn-obo files, and loading the 
+sgn-obo file into a breedbase instance.
 
 1) Edit / Add Traits in the **Trait Workbook**
 
@@ -11,6 +14,10 @@ Workflow for Building and Loading an Ontology
     
     > If there is an exisiting **Trait Dictionary** for the crop ontology,
     > the **Trait Workbook** can be created using the `create_tw.pl` script.
+    
+    > For more information on creating a **Trait Workbook** for a new crop
+    > (when an existing **Trait Dictionary** does not exist), see the 
+    > [Creating a New Ontology workflow](WORKFLOW_NEW.md)
 
 
 2) Generate the **Trait Dictionary** and/or **standard-obo** files:
@@ -18,6 +25,8 @@ Workflow for Building and Loading an Ontology
     `perl build_traits.pl -t traits.csv -o traits.obo -u DJW -v traits.xlsx`
 
      > The `traits.csv` file can be used to update the Crop Ontology website
+
+     > The `traits.obo` file will be used to create the obo file that is necessary to load the trait ontology into breedbase
 
 
 3) Convert the **standard-obo** file to an **sgn-obo** file:

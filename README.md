@@ -6,8 +6,7 @@ convert trait ontologies between various different formats that are
 used internally to manage the traits, by the Crop Ontology website, 
 and by the breeDBase backend.
 
-File Formats
------
+## File Formats
 
 **Trait Workbook:** An Excel workbook containing separate worksheets for 
 each data type: Variables, Traits, Methods, Scales, Trait Classes, and 
@@ -29,9 +28,17 @@ Each data type (Variable, Trait, Method, Scale) is represented by a
   * The sgn-obo file uses a single namespace for the root elements, variables 
     and traits
     
+## Documentation
+
+### Workflows
+
+The following documents contain information on the general steps and workflow of
+creating a new ontology from scratch or working with an existing 
+
+- [Creating an ontology from scrach](WORKFLOW_NEW.md)
+- [Working with an existing ontology](WORKFLOW_EXISTING.md)
     
-Scripts
------
+### Scripts
 
 **create_tw.pl** - Create a Trait Workbook from an existing Trait Dictionary
 
@@ -40,8 +47,7 @@ NAME
     create_tw.pl
 
 SYNOPSIS
-    Usage: perl create_tw.pl -d namespace -n name -r root -o output [-v]
-    input
+    Usage: perl create_tw.pl -d namespace -n name -r root -o output [-v] [input]
 
     Options/Arguments:
 
@@ -61,7 +67,9 @@ SYNOPSIS
 
     input   specify the Crop Ontology Root ID (ex: CO_360) to download the
             trait dictionary from cropontology.org OR the file path to an
-            existing trait dictionary.
+            existing trait dictionary. If no input is provided, a new trait
+            workbook will be created containing an example variable, trait,
+            and scale.
 
 DESCRIPTION
     This will create a 'Trait Workbook' Excel file from an existing Crop
