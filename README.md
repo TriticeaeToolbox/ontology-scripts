@@ -197,3 +197,4 @@ AUTHOR
 - Spreadsheet::ParseXLSX
 - Text::CSV_XS
 - DateTime::Format::Excel
+- `curl` must be installed to download a Trait Dictionary from the Crop Ontology website.

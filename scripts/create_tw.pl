@@ -70,7 +70,7 @@ David Waring <djw64@cornell.edu>
 use strict;
 use warnings;
 use Getopt::Std;
-use File::Fetch;
+use Spreadsheet::Read;
 use Excel::Writer::XLSX;
 use Excel::Writer::XLSX::Utility;
 use DateTime::Format::Excel;
@@ -79,7 +79,7 @@ use Data::Dumper;
 
 
 # Download URL for CO Trait Dictionary
-my $CO_DOWNLOAD_URL = "http://www.cropontology.org/report?ontology_id={{CO_ROOT_ID}}";
+my $CO_DOWNLOAD_URL = "https://cropontology.org/report/{{CO_ROOT_ID}}";
 
 
 # Trait Workbook Headers
@@ -100,9 +100,9 @@ my @TW_ROOT_HEADERS = ("Root ID", "Root name", "namespace");
 my $CF_MAX_ROW = 9999;
 
 
-# Example Row for Blank Workbook
-my $BLANK_HEADER = '"Curation";"Variable ID";"Variable name";"Variable synonyms";"Context of use";"Growth stage";"Variable status";"Variable Xref";"Institution";"Scientist";"Date";"Language";"Crop";"Trait ID";"Trait name";"Trait class";"Trait description";"Trait synonyms";"Main trait abbreviation";"Alternative trait abbreviations";"Entity";"Attribute";"Trait status";"Trait Xref";"Method ID";"Method name";"Method class";"Method description";"Formula";"Method reference";"Scale ID";"Scale name";"Scale class";"Decimal places";"Lower limit";"Upper limit";"Scale Xref";"Category 1";"Category 2";"Category 3";"Category 4";"Category 5";"Category 6";"Category 7";"Category 8";"Category 9";"Category 10"';
-my $BLANK_ROW = '"";"CO_999:0000004";"PH_M_cm";"";"Trial evaluation";"Harvest";"";"";"Cornell University";"";"15-Feb-2018";"English";"Crop";"CO_999:000003";"Plant Height";"Morphological trait";"The observed height of the plant";"";"PH";"";"Stem";height";"";"";"CO_360:0000002";"Plant Height - Measurement";"Measurement";"Direct measurement of the plant height from the ground level to the tallest part of the plant";"";"";"CO_360:0000001";"cm";"Numerical";"2";"";"";"";"";"";"";"";"";"";"";"";"";""';
+# Example Row for Blank Trait Dicitionary
+my @BLANK_HEADER = ("Curation", "Variable ID", "Variable name", "Variable synonyms", "Context of use", "Growth stage", "Variable status", "Variable Xref", "Institution", "Scientist", "Date", "Language", "Crop", "Trait ID", "Trait name", "Trait class", "Trait description", "Trait synonyms", "Main trait abbreviation", "Alternative trait abbreviations", "Entity", "Attribute", "Trait status", "Trait Xref", "Method ID", "Method name", "Method class", "Method description", "Formula", "Method reference", "Scale ID", "Scale name", "Scale class", "Decimal places", "Lower limit", "Upper limit", "Scale Xref", "Category 1", "Category 2", "Category 3", "Category 4", "Category 5", "Category 6", "Category 7", "Category 8", "Category 9", "Category 10");
+my @BLANK_ROW = ("", "CO_999:0000004", "PH_M_cm", "", "Trial evaluation", "Harvest", "", "", "Cornell University", "", "15-Feb-2018", "English", "Crop", "CO_999:000003", "Plant Height", "Morphological trait", "The observed height of the plant", "", "PH", "", "Stem", "height", "", "", "CO_360:0000002", "Plant Height - Measurement", "Measurement", "Direct measurement of the plant height from the ground level to the tallest part of the plant", "", "", "CO_360:0000001", "cm", "Numerical", "2", "", "", "", "", "", "", "", "", "", "", "", "", "");
 
 
 #######################################
@@ -148,7 +148,7 @@ message("   Ontology Name: $name");
 message("   Default Namespace: $namespace");
 
 
-# Get the Trait Dictionary
+# Get the parsed Trait Dictionary contents
 my $td = getTD($input);
 
 # Create the Trait Workbook
@@ -158,59 +158,148 @@ create($output, $td);
 
 
 #######################################
-## TRAIT WORKBOOK FUNCTIONS
-## Download and Create a Trait Workbook
+## TRAIT DICTIONARY FUNCTIONS
+## Functions for downloading or reading 
+## the initial trait dictionary
 #######################################
-
 
 
 ######
 ## getTD()
 ##
-## Get the trait dictionary of the specified ontology
-##      - read file input OR
-##      - download the trait dictionary
+## Get the parsed TD Contents (as an array of hashes) 
+## from the specified input (_BLANK_, file path, or CO ID)
 ##
-## Arguments:
-##      $input: file path OR CO Root ID (ex: CO_360)
+## Arguments
+##      $input: _BLANK_ to create a blank trait workbook
+##              file path to read an existing trait dicionary file (.xlsx)
+##              CO Identifier to download a trait dictionary file
 ##
-## Returns: Trait Dictionary contents
+## Returns: the Trait Dictionary contents (as an array of hashes)
 ######
 sub getTD {
     my $input = shift;
     my $contents;
 
-    # Start with Blank TD
+    # Create Blank TD
     if ( $input eq "_BLANK_" ) {
-        message("Creating Blank Trait Workbook...");
-        $contents = $BLANK_HEADER . "\n" . $BLANK_ROW;
+        $contents = getTD_blank();
     }
 
     # Input File Exists
     elsif ( -s $input ) {
-        message("Using existing TD file [$input]...");
-        open my $fh, '<', $input or die "Can't open input file [$input] $!";
-        $contents = do { local $/; <$fh> };
+        $contents = getTD_file($input);
     }
 
     # Download from CO
     else {
-
-        # Set URL
-        my $url = $CO_DOWNLOAD_URL;
-        $url =~ s/\{\{CO_ROOT_ID\}\}/$input/;
-
-        # Download TD from CO
-        message("Downloading Trait Dictionary [$url]...");
-        my $ff = File::Fetch->new(uri => $url);
-        my $file = $ff->fetch(to => \$contents) or die $ff->error;
-
+        $contents = getTD_CO($input);
     }
 
-    # return file contents
     return $contents;
 }
 
+
+######
+## getTD_blank()
+##
+## Get the parsed TD Contents (as an array of hashes) 
+## for a blank trait dictionary
+##
+## Returns: the Trait Dictionary contents (as an array of hashes)
+######
+sub getTD_blank {
+    my @contents;
+
+    message("Creating Blank Trait Workbook...");
+    my %row;
+    for my $i (0 .. $#BLANK_HEADER) {
+        $row{$BLANK_HEADER[$i]} = $BLANK_ROW[$i];
+    }
+    push(@contents, \%row);
+
+    return \@contents;
+}
+
+
+######
+## getTD_file()
+##
+## Get the parsed TD Contents (as an array of hashes) 
+## for the specified trait dictionary file
+##
+## Returns: the Trait Dictionary contents (as an array of hashes)
+######
+sub getTD_file {
+    my $input = shift;
+    my @contents;
+
+    message("Using existing TD file [$input]...");
+
+    # Read Excel File
+    my $book = Spreadsheet::Read->new($input);
+    my $sheet = $book->sheet(1);
+
+    # Read the Header
+    my @header = $sheet->row(1);
+
+    # Read each Row
+    for ( my $i = 2; $i <= $sheet->maxrow; $i++ ) {
+        my @row = $sheet->row($i);
+        my %row_items;
+        while ( my ($index, $value) = each(@row) ) {
+            my $key = $header[$index];
+            $row_items{$key} = $value;
+        }
+        push(@contents, \%row_items);
+    }
+
+    return \@contents;
+}
+
+
+######
+## getTD_CO()
+##
+## Download a Trait Dictionary from the Crop Ontology
+## website for the specified CO Identifier.  Then, 
+## get the parsed TD Contents (as an array of hashes).
+##
+## Returns: the Trait Dictionary contents (as an array of hashes)
+######
+sub getTD_CO {
+    my $input = shift;
+    my $output = "CREATE_TW_TEMP_TD.xlsx";
+    my $contents;
+
+    # Set URL
+    my $url = $CO_DOWNLOAD_URL;
+    $url =~ s/\{\{CO_ROOT_ID\}\}/$input/;
+
+    # Download TD from CO
+    message("Downloading Trait Dictionary [$url]...");
+    system("curl '$url' --output '$output'");
+
+    # Parse Download TD
+    if ( -s $output ) {
+        $contents = getTD_file($output);
+        unlink($output);
+    }
+    else {
+        die "==> ERROR: Could not download Trait Dictionary from Crop Ontology!";
+    }
+
+    return $contents;
+}
+
+
+
+
+#######################################
+## TRAIT WORKBOOK FUNCTIONS
+## Functions for creating the trait 
+## workbook from a trait dictionary
+#######################################
 
 ######
 ## create()
@@ -225,9 +314,6 @@ sub getTD {
 sub create {
     my $file = shift;
     my $td = shift;
-
-    # Parse the Trait Dictionary
-    my $parsed = parseTD($td);
 
     # Set up Workbook with worksheets
     my $wb = Excel::Writer::XLSX->new($file);
@@ -246,105 +332,12 @@ sub create {
     );
 
     # Add Variables, Traits, Methods, Scales
-    addVariables($v, $parsed, $error_format);
-    addTraits($t, $parsed, $error_format);
-    addMethods($m, $parsed, $error_format);
-    addScales($s, $parsed, $error_format);
-    addTraitClasses($c, $parsed, $error_format);
+    addVariables($v, $td, $error_format);
+    addTraits($t, $td, $error_format);
+    addMethods($m, $td, $error_format);
+    addScales($s, $td, $error_format);
+    addTraitClasses($c, $td, $error_format);
     addRoot($r, $root, $name, $namespace);
-}
-
-
-######
-## parseTD()
-##
-## Parse the Trait Dictionary contents into a list of hashes, 
-## where each row of the TD is a hash with the key set to 
-## the column name
-##
-## Arguments:
-##      $td = Trait Dictionary contents, lines of a semi-colon
-##          separated and quoted file
-##
-## Returns: reference to array of parsed lines
-######
-sub parseTD {
-    my $td = shift;
-    my @parsed = ();
-
-    # Split TD by Line
-    my @lines = (split /\n/, $td);
-
-    # Get Headers from TD, first line
-    my $headers = parseTDLine($lines[0]);
-
-    # Parse each additional line in the TD
-    for my $i (1 .. $#lines) {
-        my $line = parseTDLine($lines[$i], $headers);
-        push(@parsed, $line);
-    }
-
-    # Return parsed Lines
-    return(\@parsed);
-}
-
-
-#######
-## parseTDLine()
-##
-## Parse the Trait Dictionary Line into a hash with the 
-## keys set to the column names
-##
-## Arguments:
-##      $line: semi-colon, quoted line from the TD
-##      [$headers]: reference to hash of header names with keys 
-##          set to column index
-##
-## Returns: hash of line contents
-#######
-sub parseTDLine {
-    my $line = shift;
-    my $headers = shift;
-    my %item;
-
-    my @parts = split('";', $line);
-    my $i = 0;
-    my $cat_count = 11;
-    for (@parts) {
-        my $value = $_;
-        $value =~ s/^"//;
-        $value =~ s/;$//;
-        $value =~ s/"$//;
-        $value =~ s/\r[\n]*//gm;
-
-        if ( defined($value) && !($value eq "") && !($value eq "\"") ) {
-            if ( defined($headers) ) {
-                if ( defined($headers->{$i}) ) {
-                    my $header = $headers->{$i};
-                    $item{$header} = $value;
-                    if ( index($header, "Category") != -1 ) {
-                        my $cat_index = $header;
-                        $cat_index =~ s/[Cc]ategory[ ]*//;
-                        if ( $cat_index > $TW_SCALE_CATEGORY_COUNT ) {
-                            $TW_SCALE_CATEGORY_COUNT = $cat_index;
-                        }
-                    }
-                }
-                else {
-                    if ( $cat_count > $TW_SCALE_CATEGORY_COUNT) { $TW_SCALE_CATEGORY_COUNT = $cat_count; }
-                    $item{"Category $cat_count"} = $value;
-                    $cat_count++;
-                }
-            }
-            else {
-                $item{$i} = $value;
-            }
-        }
-
-        $i++;
-    }
-
-    return \%item;
 }
 
 
