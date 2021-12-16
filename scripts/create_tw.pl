@@ -70,6 +70,7 @@ David Waring <djw64@cornell.edu>
 use strict;
 use warnings;
 use Getopt::Std;
+use File::Temp qw(tempfile);
 use Spreadsheet::Read;
 use Excel::Writer::XLSX;
 use Excel::Writer::XLSX::Utility;
@@ -234,7 +235,7 @@ sub getTD_file {
     my $input = shift;
     my @contents;
 
-    message("Using existing TD file [$input]...");
+    message("Reading TD file [$input]...");
 
     # Read Excel File
     my $book = Spreadsheet::Read->new($input);
@@ -269,8 +270,10 @@ sub getTD_file {
 ######
 sub getTD_CO {
     my $input = shift;
-    my $output = "CREATE_TW_TEMP_TD.xlsx";
     my $contents;
+
+    # Create Tempfile
+    my($fh, $output) = tempfile(SUFFIX => ".xlsx");
 
     # Set URL
     my $url = $CO_DOWNLOAD_URL;
@@ -278,12 +281,12 @@ sub getTD_CO {
 
     # Download TD from CO
     message("Downloading Trait Dictionary [$url]...");
+    message("...to $output");
     system("curl '$url' --output '$output'");
 
     # Parse Download TD
     if ( -s $output ) {
         $contents = getTD_file($output);
-        unlink($output);
     }
     else {
         die "==> ERROR: Could not download Trait Dictionary from Crop Ontology!";
