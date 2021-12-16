@@ -673,7 +673,7 @@ sub writeOBOFile {
     $contents = OBOAddVariables($root_id, $root_namespace . "_variable", $variables, $traits, $methods, $scales, $contents);
 
     # Write contents to file
-    open(my $fh, '>', $file);
+    open(my $fh, '>:encoding(UTF-8)', $file);
     print $fh $contents;
     close($fh);
 }
@@ -983,6 +983,7 @@ sub OBOAddTraits {
         my $class = findElement($classes, "Trait class name", $trait->{'Trait class'});
 
         my $trait_xref = defined($trait->{'Trait Xref'}) ? $trait->{'Trait Xref'} : "";
+        my $trait_syn = defined($trait->{'Main trait abbreviation'} ? $trait->{'Main trait abbreviation'} : "");
 
         # Set trait info
         my %items = (
@@ -990,7 +991,7 @@ sub OBOAddTraits {
             name => $trait->{'Trait name'},
             namespace => $namespace, 
             def => "\"" . $trait->{'Trait description'} . "\" [" . $trait_xref . "]",
-            synonym1 => "\"" . $trait->{'Main trait abbreviation'} . "\" EXACT []",
+            synonym1 => "\"" . $trait_syn . "\" EXACT []",
             is_a => $root_id . ":" . $class->{'Trait class ID'}
         );
 
