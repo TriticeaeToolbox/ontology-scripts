@@ -983,7 +983,7 @@ sub OBOAddTraits {
         my $class = findElement($classes, "Trait class name", $trait->{'Trait class'});
 
         my $trait_xref = defined($trait->{'Trait Xref'}) ? $trait->{'Trait Xref'} : "";
-        my $trait_syn = defined($trait->{'Main trait abbreviation'} ? $trait->{'Main trait abbreviation'} : "");
+        my $trait_syn = defined($trait->{'Main trait abbreviation'}) ? $trait->{'Main trait abbreviation'} : "";
 
         # Set trait info
         my %items = (
