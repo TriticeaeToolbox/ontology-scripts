@@ -6,7 +6,7 @@ build_traits.pl
 
 =head1 SYNOPSIS
 
-Usage: perl build_traits.pl [-o output -u username] [-t output] [-i institution] [-c category count] [-fv] file 
+Usage: perl build_traits.pl [-o output -u username] [-t output] [-i institution] [-c category count] [-fqv] file 
 
 Options/Arguments:
 
@@ -36,6 +36,10 @@ specify the number of scale categories that are defined in the trait workbook (d
 =item -f
 
 force the generation of the files (ignore the unique and required checks)
+
+=item -q
+
+trait dictionary file: enclose the values with double quotes (and change double quotes in the value to two double quotes)
 
 =item -v
 
@@ -78,7 +82,7 @@ use Data::Dumper;
 
 # PROGRAM INFORMATION
 my $PROGRAM_NAME = "build_traits.pl";
-my $PROGRAM_VERSION = "1.1";
+my $PROGRAM_VERSION = "1.2";
 
 
 # Set Trait Workbook Sheet Names
@@ -128,7 +132,7 @@ my @OBO_TERM_TAGS = ("id","is_anonymous","name","namespace","alt_id","def","comm
 
 # Get command line flags/options
 my %opts=();
-getopts("c:i:o:t:u:fv", \%opts);
+getopts("c:i:o:t:u:fqv", \%opts);
 
 my $verbose = $opts{v};
 my $obo_output = $opts{o};
@@ -136,6 +140,7 @@ my $obo_user = $opts{u};
 my $td_output = $opts{t};
 my $filter_institution = $opts{i};
 my $ignore_checks = $opts{f};
+my $quote = $opts{q};
 my $td_scale_category_count = $opts{c} ? $opts{c} : $DEFAULT_TD_SCALE_CATEGORY_COUNT;
 
 
@@ -595,7 +600,15 @@ sub createTraitDictionaryLine {
         if ( !defined($value) ) {
             $value = '';
         }
-        $line = $line . "\"" . $value . "\"";
+
+        if ( $quote ) {
+            $value =~ s/\"/\"\"/g;
+            $line = $line . "\"" . $value . "\"";
+        }
+        else {
+            $line = $line . $value;
+        }
+
         if ( $i < (scalar @{$headers})-1 ) {
             $line = $line . ";";
         }

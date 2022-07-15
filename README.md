@@ -121,6 +121,9 @@ SYNOPSIS
     -f      force the generation of the files (ignore the unique and
             required checks)
 
+    -q      trait dictionary file: enclose the values with double quotes
+            (and change double quotes in the value to two double quotes)
+
     -v      verbose output
 
     file    file path to the trait workbook
