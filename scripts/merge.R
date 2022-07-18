@@ -11,6 +11,16 @@ EXISTING = NA         # existing CO file path
 UPDATED = NA          # updated CO file path
 MERGED = NA           # merged CO file path
 
+# SEPARATORS
+EXISTING_SEP = ","
+UPDATED_SEP = ";"
+MERGED_SEP = ","
+
+# QUOTES
+EXISTING_QUOTE = "\""
+UPDATED_QUOTE = "\""
+MERGED_QUOTE = "needed"
+
 # Actions for added/removed variables
 REMOVE_EXISTING = TRUE
 ADD_NEW = TRUE
@@ -48,8 +58,8 @@ print(sprintf("Updated Trait Ontology: %s", UPDATED))
 
 
 # Read the input files
-existing = as_tibble(read.csv(EXISTING, sep=";", quote="", row.names=NULL))
-updated = as_tibble(read.csv(UPDATED, sep=";", quote="", row.names=NULL))
+existing = as_tibble(read.csv(EXISTING, sep=EXISTING_SEP, quote=EXISTING_QUOTE, row.names=NULL))
+updated = as_tibble(read.csv(UPDATED, sep=UPDATED_SEP, quote=UPDATED_QUOTE, row.names=NULL))
 merged = tibble()
 
 
@@ -105,5 +115,5 @@ colnames(merged) = unlist(lapply(colnames(merged), function(x) { gsub("\\.", " "
 
 
 # Write the merged file
-write.csv(merged, MERGED, row.names=F, na="")
+write_delim(merged, MERGED, delim=MERGED_SEP, quote=MERGED_QUOTE, na="")
 print(sprintf("Merged Trait Ontology: %s", MERGED))
