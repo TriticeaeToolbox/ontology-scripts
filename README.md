@@ -194,6 +194,7 @@ AUTHOR
 
 ### Perl Dependencies
 
+- JSON
 - Excel::Writer::XLSX
 - Excel::Writer::XLSX::Utility
 - Spreadsheet::Read
