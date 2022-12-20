@@ -22,7 +22,7 @@ sgn-obo file into a breedbase instance.
 
 2) Generate the **Trait Dictionary** and/or **standard-obo** files:
     
-    `perl build_traits.pl -t traits.csv -o traits.obo -u DJW -v traits.xlsx`
+    `perl build_traits.pl -t traits.csv -o traits.obo -u DJW -i T3 -v traits.xlsx`
 
      > The `traits.csv` file can be used to update the Crop Ontology website
 
