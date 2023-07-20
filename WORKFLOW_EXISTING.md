@@ -32,6 +32,7 @@ sgn-obo file into a breedbase instance.
 3) Convert the **standard-obo** file to an **sgn-obo** file:
     
     `perl convert_obo.pl 
+        --remove-synonyms
         -d sugar_kelp_trait 
         -o sgn.obo -v traits.obo`
 

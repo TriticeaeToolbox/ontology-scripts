@@ -146,8 +146,8 @@ NAME
     convert_obo.pl
 
 SYNOPSIS
-    Usage: perl convert_obo.pl -d namespace [-n namespace] -o output [-v]
-    input
+    Usage: perl convert_obo.pl -d namespace [-n namespace]
+    [--remove-synoynms] -o output [-v] input
 
     Example: perl convert_obo.pl -d barley_traits -n barley_traits_trait -n
     barley_traits_variable -o sgn.obo standard.obo
@@ -172,6 +172,13 @@ SYNOPSIS
             By default, this script will use the {default namespace},
             {default namespace}_trait, and {default namepspace}_variable
             namespaces to convert if none are given here.
+
+    --remove-synoynms
+            When this flag is set, variable synonyms will be removed from
+            the .obo file. We've noticed that if a variable has any
+            synonyms, the synonyms will be preferred over the actual name
+            when the traits are fetched via BrAPI to be used in the Field
+            Book app.
 
     --output, -o
             specify the output location for the sgn-obo file
