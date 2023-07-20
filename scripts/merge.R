@@ -12,17 +12,17 @@ UPDATED = NA          # updated CO file path
 MERGED = NA           # merged CO file path
 
 # SEPARATORS
-EXISTING_SEP = ","
+EXISTING_SEP = ";"
 UPDATED_SEP = ";"
-MERGED_SEP = ","
+MERGED_SEP = ";"
 
 # QUOTES
 EXISTING_QUOTE = "\""
 UPDATED_QUOTE = "\""
-MERGED_QUOTE = "needed"
+MERGED_QUOTE = "all"
 
 # Actions for added/removed variables
-REMOVE_EXISTING = TRUE
+REMOVE_EXISTING = FALSE
 ADD_NEW = TRUE
 
 
@@ -63,6 +63,14 @@ updated = as_tibble(read.csv(UPDATED, sep=UPDATED_SEP, quote=UPDATED_QUOTE, row.
 merged = tibble()
 
 
+# Check to make sure the columns in both files are the same
+existing_cols = names(existing)
+updated_cols = names(updated)
+if ( !identical(existing_cols, updated_cols) ) {
+    stop("The columns of the existing and updated files don't match!")
+}
+
+
 # Build summary table (which variables are in each file)
 summary = tibble(
     variable = sort(unique(c(existing$`Variable.ID`, updated$`Variable.ID`))),
@@ -96,8 +104,12 @@ for ( i in c(1:nrow(existing)) ) {
     id = e$Variable.ID
 
     # Get the updated information
-    if ( id %in% variables_both || (id %in% variables_existing && !REMOVE_EXISTING) ) {
+    if ( id %in% variables_both ) {
         m = filter(updated, Variable.ID == id)
+        merged = rbind(merged, m)
+    }
+    else if ( id %in% variables_existing && !REMOVE_EXISTING ) {
+        m = filter(existing, Variable.ID == id)
         merged = rbind(merged, m)
     }
 }
