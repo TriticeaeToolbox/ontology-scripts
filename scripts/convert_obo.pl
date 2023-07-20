@@ -6,7 +6,7 @@ convert_obo.pl
 
 =head1 SYNOPSIS
 
-Usage: perl convert_obo.pl -d namespace [-n namespace] -o output [-v] input
+Usage: perl convert_obo.pl -d namespace [-n namespace] [--remove-synoynms] -o output [-v] input
 
 Example: perl convert_obo.pl -d barley_traits -n barley_traits_trait -n barley_traits_variable -o sgn.obo standard.obo
 
@@ -30,6 +30,12 @@ namespaces of the ontology root term, trait classes, traits, and variables.
 
 By default, this script will use the {default namespace}, {default namespace}_trait, 
 and {default namepspace}_variable namespaces to convert if none are given here.
+
+=item --remove-synoynms
+
+When this flag is set, variable synonyms will be removed from the .obo file.  We've 
+noticed that if a variable has any synonyms, the synonyms will be preferred over the 
+actual name when the traits are fetched via BrAPI to be used in the Field Book app.
 
 =item --output, -o
 
@@ -87,10 +93,12 @@ my $PROGRAM_VERSION = "1.1";
 # Get command line flags/options
 my $default_namespace;
 my $namespaces;
+my $remove_synonyms;
 my $output;
 my $verbose;
 GetOptions("default=s" => \$default_namespace,
            "namespace=s@" => \$namespaces,
+           "remove-synonyms" => \$remove_synonyms,
            "output=s" => \$output,
            "verbose" => \$verbose);
 my $input = shift;
@@ -122,6 +130,7 @@ message("Command Inputs:");
 message("   Standard-OBO File: $input");
 message("   SGN-OBO File: $output");
 message("   Default Namespace: $default_namespace");
+message("   Remove Synoynms: " . (defined($remove_synonyms) ? "YES" : "no"));
 message("   Namespaces to Convert: " . join(',', @$namespaces));
 
 
@@ -149,6 +158,11 @@ $contents = replaceNameZero($contents);
 
 # Remove DBXrefs
 $contents = removeDBXrefs($contents);
+
+# Remove Synonyms
+if ( defined($remove_synonyms) ) {
+    $contents = removeSynonyms($contents);
+}
 
 # Write File
 writeFile($output, $contents);
@@ -289,6 +303,23 @@ sub replaceNameZero {
 sub removeDBXrefs {
     my $contents = shift;
     $contents =~ s/^def: (.*) \[.*\]$/def: $1 \[\]/gm;
+    return $contents;
+}
+
+
+######
+## removeSynonyms()
+##
+## Remove all synonym lines from the obo file
+##
+## Arguments
+##      $contents: file fontents to be updated
+##
+## Returns: updated file contents
+######
+sub removeSynonyms {
+    my $contents = shift;
+    $contents =~ s/^synonym:.*EXACT \[\]\n//gm;
     return $contents;
 }
 
