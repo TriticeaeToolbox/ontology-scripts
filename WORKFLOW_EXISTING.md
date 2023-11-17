@@ -33,7 +33,7 @@ sgn-obo file into a breedbase instance.
     
     `perl convert_obo.pl 
         --remove-synonyms
-        -d sugar_kelp_trait 
+        -d wheat_trait 
         -o sgn.obo -v traits.obo`
 
     > The `sgn.obo` file can be used to load the traits into **breeDBase**
