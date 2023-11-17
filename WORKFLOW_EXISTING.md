@@ -27,6 +27,8 @@ sgn-obo file into a breedbase instance.
      > The `traits.csv` file can be used to update the Crop Ontology website
 
      > The `traits.obo` file will be used to create the obo file that is necessary to load the trait ontology into breedbase
+     
+     > The `-i T3` option filters the variables by the Institution column and will only include variables that contain T3 as the Institution.
 
 
 3) Convert the **standard-obo** file to an **sgn-obo** file:
