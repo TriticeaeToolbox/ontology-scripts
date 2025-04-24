@@ -6,7 +6,7 @@ build_traits.pl
 
 =head1 SYNOPSIS
 
-Usage: perl build_traits.pl [-o output -u username] [-t output] [-i institution] [-c category count] [-fqv] file 
+Usage: perl build_traits.pl [-o output -u username] [-t output] [-i institution] [-c category count] [--use-preferred-synonyms] [-fqv] file 
 
 Options/Arguments:
 
@@ -40,6 +40,10 @@ force the generation of the files (ignore the unique and required checks)
 =item -q
 
 trait dictionary file: enclose the values with double quotes (and change double quotes in the value to two double quotes)
+
+=item --use-preferred-synonyms
+
+use the preferred synonym instead of the variable synonyms for the variable terms
 
 =item -v
 
@@ -75,14 +79,14 @@ David Waring <djw64@cornell.edu>
 
 use strict;
 use warnings;
-use Getopt::Std;
+use Getopt::Long;
 use Spreadsheet::Read;
 use JSON;
 use Data::Dumper;
 
 # PROGRAM INFORMATION
 my $PROGRAM_NAME = "build_traits.pl";
-my $PROGRAM_VERSION = "1.2";
+my $PROGRAM_VERSION = "1.3";
 
 
 # Set Trait Workbook Sheet Names
@@ -131,21 +135,27 @@ my @OBO_TERM_TAGS = ("id","is_anonymous","name","namespace","alt_id","def","comm
 #######################################
 
 # Get command line flags/options
-my %opts=();
-getopts("c:i:o:t:u:fqv", \%opts);
-
-my $verbose = $opts{v};
-my $obo_output = $opts{o};
-my $obo_user = $opts{u};
-my $td_output = $opts{t};
-my $filter_institution = $opts{i};
-my $ignore_checks = $opts{f};
-my $quote = $opts{q};
-my $td_scale_category_count = $opts{c} ? $opts{c} : $DEFAULT_TD_SCALE_CATEGORY_COUNT;
-
-
-# Get trait workbook file location
+my $verbose;
+my $obo_output;
+my $obo_user;
+my $td_output;
+my $filter_institution;
+my $ignore_checks;
+my $quote;
+my $td_scale_category_count = $DEFAULT_TD_SCALE_CATEGORY_COUNT;
+my $use_preferred_synonyms;
+GetOptions("v" => \$verbose,
+           "o=s" => \$obo_output,
+           "u=s" => \$obo_user,
+           "t=s" => \$td_output,
+           "i=s" => \$filter_institution,
+           "f" => \$ignore_checks,
+           "q" => \$quote,
+           "c=s" => \$td_scale_category_count,
+           "use-preferred-synonyms" => \$use_preferred_synonyms);
 my $wb_file = shift;
+
+# Make sure workbook file is given
 if ( !$wb_file ) {
     die "==> ERROR: A trait workbook file is a required argument.\n";
 }
@@ -168,14 +178,12 @@ message("   Trait Workbook File: $wb_file");
 if ( defined($filter_institution) ) {
     message("   Filter Traits By Institution: $filter_institution");
 }
+$use_preferred_synonyms ? message("   Variable Synonyms: Preferred") : message("   Variable Synonyms: Variable");
 if ( $obo_output ) { 
     message("   OBO Output File: $obo_output");
     message("   Username: $obo_user");
 }
 if ( $td_output ) { message("   TD Output File: $td_output"); }
-
-
-
 
 
 
@@ -743,7 +751,8 @@ sub OBOAddTerm {
     $contents = $contents . "\n[Term]\n";
     for (@OBO_TERM_TAGS) {
         my $tag = $_;
-        while ( my ($key, $value) = each(%$items) ) {
+        foreach my $key (sort keys %$items) {
+            my $value = $items->{$key};
             my $re = "^" . $tag . "[0-9]*\$";
             if ( $key =~ /$re/ ) {
                 $contents = OBOAddKey($key, $value, $contents);
@@ -952,8 +961,9 @@ sub OBOAddVariables {
         }
 
         # Add Variable variable_synonyms
-        if ( defined($variable->{'Variable synonyms'}) ) {
-            my @variable_synonyms = split(/,/, $variable->{'Variable synonyms'});
+        my $syn_col_name = $use_preferred_synonyms ? 'Preferred synonym' : 'Variable synonyms';
+        if ( defined($variable->{$syn_col_name}) ) {
+            my @variable_synonyms = split(/,/, $variable->{$syn_col_name});
             foreach my $i (0..$#variable_synonyms) {
                 $items{'synonym' . ($i+1)} = "\"" . trimws($variable_synonyms[$i]) . "\" EXACT []";
             }
@@ -1063,7 +1073,7 @@ sub OBOAddMethods {
         );
 
         # Get Trait IDs of traits using the current method
-        my $count = 1;
+        my %relationships;
         for (@$variables) {
             my $variable = $_;
             if ( $variable->{'Method name'} eq $method->{'Method name'} ) {
@@ -1072,12 +1082,17 @@ sub OBOAddMethods {
                 my $trait_value = "method_of " . $trait_id;
                 
                 # Add Trait ID as a relationship of the method
-                if ( (grep { $_ eq $trait_value } values %items) == 0 ) {
-                    $items{"relationship" . $count} = $trait_value;
-                    # $items{"is_a" . $count} = $trait_id;
-                    $count++;
+                if ( ! exists $relationships{$trait_value} ) {
+                    $relationships{$trait_value} = 1;
                 }
             }
+        }
+
+        # Add Trait IDs as a relationship of the method
+        my $count = 1;
+        foreach ( sort(keys %relationships) ) {
+            $items{"relationship". $count} = $_;
+            $count++;
         }
 
         # Add Method Term
@@ -1125,7 +1140,7 @@ sub OBOAddScales {
         );
 
         # Get Method IDs of methods using the current scale
-        my $count = 1;
+        my %relationships;
         for (@$variables) {
             my $variable = $_;
             if ( $variable->{'Scale name'} eq $scale->{'Scale name'} ) {
@@ -1134,12 +1149,17 @@ sub OBOAddScales {
                 my $method_value = "scale_of " . $method_id;
                 
                 # Add Method ID as a relationship of the scale
-                if ( (grep { $_ eq $method_value } values %items) == 0 ) {
-                    $items{"relationship" . $count} = $method_value;
-                    # $items{"is_a" . $count} = $method_id;
-                    $count++;
+                if ( ! exists $relationships{$method_value} ) {
+                    $relationships{$method_value} = 1;
                 }
             }
+        }
+
+        # Add Method IDs as a relationship of the scale
+        my $count = 1;
+        foreach ( sort(keys %relationships) ) {
+            $items{"relationship". $count} = $_;
+            $count++;
         }
 
         # Check for scale category definitions
