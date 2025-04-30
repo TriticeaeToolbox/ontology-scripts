@@ -39,31 +39,46 @@ sgn-obo file into a breedbase instance.
     > The `sgn.obo` file can be used to load the traits into **breeDBase**
 
 
-4) Load the traits into **breeDBase**
+4) Generate the **Trait Props** file (additional breedbase metadata):
 
-    4A) Load the ontology
+    `perl build_trait_props.pl -o trait_props.xlsx -i T3 -v traits.xlsx`
+
+    > The `trait_props.xlsx` is the file that will be loaded into a breedbase database using the SGN `load_trait_props.pl` script
+
+    > The `-i T3` option filters the variables by the Institution column and will only include variables that contain T3 as the Institution.
+
+    > The `traits.xlsx` file is the trait workbook used to organize all of the trait data
+
+5) Load the traits into **breeDBase**
+
+    4A) Load the ontology (sgn.obo)
 
         cd /home/production/cxgn/Chado/chado/bin
         perl ./gmod_load_cvterms.pl 
-            -H localhost -D {db_name} -d Pg -r postgres -p "{postgress password}"
+            -H {db_host} -D {db_name} -d Pg -r postgres -p "{postgress password}"
             -s CO_360 -n sugar_kelp_trait -uv /path/to/sgn.obo
 
 
     4B) Connect the ontology terms
 
         perl ./gmod_make_cvtermpath.pl 
-            -H localhost -D {db_name} -d Pg -u postgres -p "{postgress password}" 
+            -H {db_host} -D {db_name} -d Pg -u postgres -p "{postgress password}" 
             -c sugar_kelp_trait -v
 
+    4C) Load the additional trait metadata (trait_props.xlsx)
 
-    4C) Tag the ontology (first time only)
+        cd /home/production/cxgn/sgn/bin
+        perl ./load_trait_props -H {db_host} -D {db_name} -o CO_360 -I trait_props.xlsx
+
+
+    4D) Tag the ontology (first time only)
 
         Update the  cvprop table to mark new cv as a 'trait_ontology'
             cv_id = cv.id of 'sugar_kelp_trait'
             type_id = cvterm.cvterm_id of 'trait_ontology'
 
 
-    4D) Make sure sgn_local.conf variables are correctly set
+    4E) Make sure sgn_local.conf variables are correctly set
 
         trait_ontology_db_name          CO_360
         trait_cv_name                   sugar_kelp_trait

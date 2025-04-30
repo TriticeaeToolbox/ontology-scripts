@@ -199,6 +199,35 @@ AUTHOR
     David Waring <djw64@cornell.edu>
 ```
 
+**build_trait_props.pl** - Generate an Excel file that includes additional metadata for breedbase
+
+```
+NAME
+    build_trait_props.pl
+
+SYNOPSIS
+    Usage: perl build_trait_props.pl [-o output] [-i institution] [-v] file
+
+    Options/Arguments:
+
+    -o      specify the output location for the trait props xlsx file
+
+    -i      filter the output to contain only the variables used by the
+            specified institution
+
+    -v      verbose output
+
+    file    file path to the trait workbook
+
+DESCRIPTION
+    Build a trait props file that contains additional information about
+    trait variables that will be loaded into a breedbase database using the
+    `load_trait_props.pl` script.
+
+AUTHOR
+    David Waring <djw64@cornell.edu>
+```
+
 ### Perl Dependencies
 
 - JSON
