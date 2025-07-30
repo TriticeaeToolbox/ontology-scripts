@@ -189,7 +189,7 @@ my @rows;
 push(@rows, \@OUTPUT_HEADER);
 foreach my $variable (@variables) {
     my $trait_name = $variable->{name};
-    my $trait_details = "TRAIT: " . $variable->{trait} . "\nMETHOD: " . $variable->{method} . "\nSCALE: " . $variable->{scale};
+    my $trait_details = "TRAIT: " . $variable->{trait} . " ::: METHOD: " . $variable->{method} . " ::: SCALE: " . $variable->{scale};
     my $trait_repeat_type = $variable->{repeat};
 
     my $scale = $scales{$variable->{scale}};
