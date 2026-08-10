@@ -172,9 +172,11 @@ for ( my $i = 2; $i <= $scales_sheet->maxrow; $i++ ) {
 
     # Parse categories into keys
     my @parsed_categories;
-    foreach (@categories) {
-        my @items = split('=', $_);
-        push(@parsed_categories, $items[0]);
+    if ( $scale{class} eq 'Ordinal' || $scale{class} eq 'Nominal' ) {
+        foreach (@categories) {
+            my @items = split('=', $_);
+            push(@parsed_categories, $items[0]);
+        }
     }
 
     $scale{categories} = join('/', @parsed_categories);
